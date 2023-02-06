@@ -1,0 +1,56 @@
+
+
+name: dns-failover
+services:
+  tc:
+    image: lukaszlach/docker-tc
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/docker-tc:/var/docker-tc
+    deploy:
+      mode: global
+      restart_policy:
+        condition: any
+    platform: "linux/amd64"
+    network_mode: host
+
+  dnsmasq:
+    image: 4km3/dnsmasq
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    command: --address=/bbs/172.20.0.5 --address=/bbs/172.20.0.6 --cache-size=0 --strict-order
+
+  ping1:
+    image: ping:latest
+    build:
+      context: ./ping-server
+    ports:
+      - "5001:5000"
+    labels:
+      com.docker-tc.enabled: 1
+      com.docker-tc.delay: "12000ms"
+    networks:
+      failover-net:
+        ipv4_address: 172.20.0.5
+
+  ping2:
+    image: ping:latest
+    build:
+      context: ./ping-server
+    ports:
+      - "5002:5000"
+    networks:
+      failover-net:
+        ipv4_address: 172.20.0.6
+
+networks:
+  failover-net:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+  
+  
+  

@@ -19,9 +19,9 @@ services:
   dnsmasq:
     image: 4km3/dnsmasq
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
-    command: --address=/bbs/172.20.0.5 --address=/bbs/172.20.0.6 --cache-size=0 --strict-order
+      - "8053:53/tcp"
+      - "8053:53/udp"
+    command: --address=/horst/172.20.0.5 --address=/horst/172.20.0.6 --cache-size=0 --strict-order
 
   ping1:
     image: ping:latest
